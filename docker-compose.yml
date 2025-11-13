@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  stopwatch:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: elixir-stopwatch:latest
+    container_name: stopwatch
+    stdin_open: true
+    tty: true
+    volumes:
+      # Mount local directory for exports
+      - ./exports:/app/exports
+    environment:
+      - TERM=xterm-256color
+    restart: "no"
+
+  # Development service with live code
+  stopwatch-dev:
+    image: hexpm/elixir:1.16.0-erlang-26.2.1-alpine-3.19.0
+    container_name: stopwatch-dev
+    working_dir: /app
+    stdin_open: true
+    tty: true
+    volumes:
+      - .:/app
+      - deps:/app/deps
+      - build:/app/_build
+    environment:
+      - MIX_ENV=dev
+      - TERM=xterm-256color
+    command: sh -c "mix local.hex --force && mix local.rebar --force && mix deps.get && mix escript.build && ./stopwatch"
+    restart: "no"
+
+volumes:
+  deps:
+  build:

@@ -5,7 +5,7 @@ defmodule Stopwatch.CLI do
   Provides an interactive REPL for controlling a stopwatch with various commands.
   """
 
-  alias Stopwatch.Formatter
+  alias Stopwatch.{Export, Formatter}
 
   @commands """
 
@@ -18,6 +18,9 @@ defmodule Stopwatch.CLI do
     laps           - Display all recorded laps
     status         - Show current stopwatch state
     reset          - Reset the stopwatch
+    export         - Export data (json/csv)
+    save           - Save current session
+    load           - Load saved session
     help           - Show this help message
     quit/exit      - Exit the application
 
@@ -80,6 +83,17 @@ defmodule Stopwatch.CLI do
 
       "reset" ->
         handle_reset(stopwatch)
+
+      "export" ->
+        handle_export(stopwatch)
+        loop(stopwatch)
+
+      "save" ->
+        handle_save(stopwatch)
+        loop(stopwatch)
+
+      "load" ->
+        handle_load()
 
       command ->
         IO.puts(IO.ANSI.red() <> "Unknown command: #{command}" <> IO.ANSI.reset())
@@ -243,6 +257,93 @@ defmodule Stopwatch.CLI do
       end
     else
       loop(Stopwatch.reset(stopwatch))
+    end
+  end
+
+  defp handle_export(stopwatch) do
+    IO.puts("\n" <> IO.ANSI.cyan() <> "Export Options" <> IO.ANSI.reset())
+    IO.puts("1. Export to JSON")
+    IO.puts("2. Export laps to CSV")
+    IO.puts("3. Export history to CSV")
+    IO.write("\nSelect option (1-3): ")
+
+    case IO.gets("") |> String.trim() do
+      "1" ->
+        filename = "stopwatch_#{:os.system_time(:second)}.json"
+
+        case Export.to_json_file(stopwatch, filename) do
+          {:ok, file} ->
+            IO.puts(IO.ANSI.green() <> "✓ Exported to #{file}" <> IO.ANSI.reset())
+
+          {:error, reason} ->
+            IO.puts(IO.ANSI.red() <> "✗ Export failed: #{inspect(reason)}" <> IO.ANSI.reset())
+        end
+
+      "2" ->
+        if length(stopwatch.laps) == 0 do
+          IO.puts(IO.ANSI.yellow() <> "No laps to export." <> IO.ANSI.reset())
+        else
+          filename = "stopwatch_laps_#{:os.system_time(:second)}.csv"
+
+          case Export.laps_to_csv_file(stopwatch, filename) do
+            {:ok, file} ->
+              IO.puts(IO.ANSI.green() <> "✓ Exported to #{file}" <> IO.ANSI.reset())
+
+            {:error, reason} ->
+              IO.puts(
+                IO.ANSI.red() <> "✗ Export failed: #{inspect(reason)}" <> IO.ANSI.reset()
+              )
+          end
+        end
+
+      "3" ->
+        filename = "stopwatch_history_#{:os.system_time(:second)}.csv"
+
+        case Export.history_to_csv_file(stopwatch, filename) do
+          {:ok, file} ->
+            IO.puts(IO.ANSI.green() <> "✓ Exported to #{file}" <> IO.ANSI.reset())
+
+          {:error, reason} ->
+            IO.puts(IO.ANSI.red() <> "✗ Export failed: #{inspect(reason)}" <> IO.ANSI.reset())
+        end
+
+      _ ->
+        IO.puts(IO.ANSI.yellow() <> "Export cancelled." <> IO.ANSI.reset())
+    end
+  end
+
+  defp handle_save(stopwatch) do
+    filename = "stopwatch_session.json"
+
+    case Export.to_json_file(stopwatch, filename) do
+      {:ok, file} ->
+        IO.puts(IO.ANSI.green() <> "✓ Session saved to #{file}" <> IO.ANSI.reset())
+
+      {:error, reason} ->
+        IO.puts(IO.ANSI.red() <> "✗ Save failed: #{inspect(reason)}" <> IO.ANSI.reset())
+    end
+  end
+
+  defp handle_load do
+    filename = "stopwatch_session.json"
+
+    case File.read(filename) do
+      {:ok, _content} ->
+        IO.puts(
+          IO.ANSI.yellow() <>
+            "Session file found, but loading is not yet fully implemented." <> IO.ANSI.reset()
+        )
+
+        IO.puts("Starting fresh stopwatch instead.")
+        loop(Stopwatch.new())
+
+      {:error, :enoent} ->
+        IO.puts(IO.ANSI.yellow() <> "No saved session found." <> IO.ANSI.reset())
+        loop(Stopwatch.new())
+
+      {:error, reason} ->
+        IO.puts(IO.ANSI.red() <> "✗ Load failed: #{inspect(reason)}" <> IO.ANSI.reset())
+        loop(Stopwatch.new())
     end
   end
 

@@ -18,7 +18,18 @@ defmodule Stopwatch.MixProject do
       description: "A feature-rich command-line stopwatch with lap timing and multiple timer support",
       source_url: @source_url,
       docs: docs(),
-      package: package()
+      package: package(),
+
+      # Code quality
+      dialyzer: dialyzer(),
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test,
+        "coveralls.json": :test
+      ]
     ]
   end
 
@@ -30,7 +41,18 @@ defmodule Stopwatch.MixProject do
 
   defp deps do
     [
-      {:ex_doc, "~> 0.31", only: :dev, runtime: false}
+      # Documentation
+      {:ex_doc, "~> 0.31", only: :dev, runtime: false},
+
+      # Code quality
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
+
+      # Testing
+      {:excoveralls, "~> 0.18", only: :test},
+
+      # Utilities
+      {:jason, "~> 1.4"}
     ]
   end
 
@@ -54,6 +76,14 @@ defmodule Stopwatch.MixProject do
       licenses: ["MIT"],
       links: %{"GitHub" => @source_url},
       maintainers: ["codeforgood-org"]
+    ]
+  end
+
+  defp dialyzer do
+    [
+      plt_file: {:no_warn, "priv/plts/dialyzer.plt"},
+      plt_add_apps: [:mix, :ex_unit],
+      flags: [:error_handling, :underspecs, :unmatched_returns]
     ]
   end
 end
