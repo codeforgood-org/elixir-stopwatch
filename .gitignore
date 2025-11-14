@@ -1,10 +1,39 @@
+# Mix artifacts
 /_build
-/cover
 /deps
-/doc
-/.fetch
+/*.ez
+
+# Generate on crash by the VM
 erl_crash.dump
-*.ez
-*.beam
+
+# Static artifacts
+/doc
+
+# Code coverage
+/cover
+
+# Environment files
 /config/*.secret.exs
+.env
+.env.*
+
+# Temporary files
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Editor/IDE files
 .elixir_ls/
+.vscode/
+.idea/
+*.iml
+
+# Build artifacts
+/stopwatch
+
+# Logs
+*.log
+
+# OS generated files
+Thumbs.db

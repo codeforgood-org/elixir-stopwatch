@@ -1,0 +1,46 @@
+# Git
+.git
+.gitignore
+
+# Build artifacts
+/_build
+/deps
+/*.ez
+/stopwatch
+
+# Documentation
+/doc
+/docs
+
+# Coverage
+/cover
+
+# Environment files
+.env
+.env.*
+/config/*.secret.exs
+
+# Editor/IDE files
+.elixir_ls/
+.vscode/
+.idea/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Test files (optional - remove if you want to run tests in Docker)
+# /test
+
+# CI/CD
+.github
+
+# Other
+README.md
+CHANGELOG.md
+CONTRIBUTING.md
+LICENSE
